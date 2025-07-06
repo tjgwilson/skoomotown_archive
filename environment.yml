@@ -1,0 +1,8 @@
+name: skoomtown_archive
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12
+  - rich>=13.0.0
+  - blessed>=1.20.0
