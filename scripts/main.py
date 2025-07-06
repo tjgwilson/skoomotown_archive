@@ -19,6 +19,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from games.data_stream_decrypt import data_stream_decrypt
+from games.circuit_override import circuit_override
 
 console = Console()
 term = Terminal()
@@ -35,6 +36,15 @@ FIREWALL_LAYERS = {
             "╚══════════════════════╝"
         ]
     ),
+    "circuit_override": (
+        "[=== FIREWALL LAYER 3 ===]",
+        [
+            "   ┌───┐     ┌───┐",
+            " ┌─┴─┐   ┌─┴─┐",
+            " │   ├──■──┤   │",
+            " └───┴───┴───┘"
+        ]
+    ),
     "password_matrix": (
         "[=== FIREWALL LAYER 2 ===]",
         [
@@ -43,15 +53,6 @@ FIREWALL_LAYERS = {
             "│ ▒░░▒░░▒░░▒░░▒░░▒░░▒  │",
             "│ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   │",
             "└──────────────────────┘"
-        ]
-    ),
-    "circuit_override": (
-        "[=== FIREWALL LAYER 3 ===]",
-        [
-            "   ┌───┐     ┌───┐",
-            " ┌─┴─┐   ┌─┴─┐",
-            " │   ├──■──┤   │",
-            " └───┴───┴───┘"
         ]
     )
 }
@@ -98,7 +99,7 @@ def main() -> None:
     completed: Set[str] = set()
     games: list[tuple[str, str, Callable[[], bool], str]] = [
         ("1", "Data Stream Decrypt", data_stream_decrypt, "data_stream"),
-        ("2", "Password Matrix", pass_game, "password_matrix"),
+        ("2", "Password Matrix", circuit_override, "circuit_override"),
         ("3", "Circuit Override", pass_game, "circuit_override"),
     ]
 
