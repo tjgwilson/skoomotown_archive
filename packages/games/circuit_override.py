@@ -14,7 +14,7 @@ term = Terminal()
 # Configuration constants
 GRID_SIZE: int = 5
 TRAP_COUNT: int = 3
-TIME_LIMIT: float = 300.0  # seconds for puzzle
+TIME_LIMIT: float = 120.0  # seconds for puzzle
 ALERT_THRESHOLD: int = 1  # max traps before failure
 
 # Glitch effect constants
@@ -23,7 +23,7 @@ GLITCH_DELAY: float = 0.05
 GLITCH_CHARS: str = '░▒▓█<>*'
 
 # Beep intervals
-INITIAL_BEEP_INTERVAL: float = 1.0  # start interval
+INITIAL_BEEP_INTERVAL: float = 10.0  # start interval
 MIN_BEEP_INTERVAL: float = 0.2      # fastest beep
 
 # Tile rotation mapping (90° clockwise)

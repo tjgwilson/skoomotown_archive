@@ -20,6 +20,7 @@ from rich.text import Text
 
 from games.data_stream_decrypt import data_stream_decrypt
 from games.circuit_override import circuit_override
+from games.firewall_matrix_breach import firewall_breach
 
 console = Console()
 term = Terminal()
@@ -45,14 +46,20 @@ FIREWALL_LAYERS = {
             " └───┴───┴───┘"
         ]
     ),
-    "password_matrix": (
+    "firewall_breach": (
         "[=== FIREWALL LAYER 2 ===]",
         [
-            "┌──────────────────────┐",
-            "│ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   │",
-            "│ ▒░░▒░░▒░░▒░░▒░░▒░░▒  │",
-            "│ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   │",
-            "└──────────────────────┘"
+            "┌─────────────────────┐",
+            "│#####################│",
+            "│#...#.......#.......#│",
+            "│#.#.#.#####.#.###.#.#│",
+            "│#.#...#...#...#...#.#│",
+            "│#####.###.#.#.###.###│",
+            "│#.......#.#.#...#...#│",
+            "│#.#####.#.###.#.###.#│",
+            "│#.#.....#.....#.....#│",
+            "│#################X###│",
+            "└─────────────────────┘",
         ]
     )
 }
@@ -99,8 +106,8 @@ def main() -> None:
     completed: Set[str] = set()
     games: list[tuple[str, str, Callable[[], bool], str]] = [
         ("1", "Data Stream Decrypt", data_stream_decrypt, "data_stream"),
-        ("2", "Password Matrix", circuit_override, "circuit_override"),
-        ("3", "Circuit Override", pass_game, "circuit_override"),
+        ("2", "Circuit Override", circuit_override, "circuit_override"),
+        ("3", "Firewall Matrix Breach", firewall_breach, "firewall_breach"),
     ]
 
     while True:
