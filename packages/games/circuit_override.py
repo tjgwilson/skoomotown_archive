@@ -196,9 +196,9 @@ def circuit_override() -> bool:
     print(term.clear())
     console.print("[bold cyan]Circuit Override Protocol Ready[/bold cyan]")
     console.print(
-        "[dim]Deploy nanobots to bridge the air gap in the Skoomtown Archive vault.\n"
+        "[dim]Deploy nanobots to bridge the air gap into the Skoomtown Archive vault to allow remote access.\n"
         "Rotate tiles to form a path from [green]E[/green] to [magenta]X[/magenta]. "
-        f"Avoid {TRAP_COUNT} traps hidden by wizard encryptions. "
+        f"Avoid {TRAP_COUNT} traps hidden by wizard security professionals. "
         "Traps will flash briefly at start—memorise their locations!\n"
         f"Time limit: {TIME_LIMIT} seconds. Press Enter to begin.[/dim]"
     )

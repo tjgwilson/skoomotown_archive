@@ -39,7 +39,7 @@ LASER_BEAMS = [
 ]
 PLAYER_ICON     = "@"
 EXIT_ICON       = "X"
-ALERT_THRESHOLD = 3
+ALERT_THRESHOLD = 2
 TIME_LIMIT      = 45.0   # seconds
 REFRESH_DELAY   = 0.1    # seconds
 
@@ -54,10 +54,11 @@ def show_intro() -> None:
     panel = Panel(
         Text.from_markup(
             """
-            [bold cyan]== [bold white]SYS-BREACH PROTOCOL V4.0[/bold white] [bold cyan]==
+            [bold cyan]== [bold white]Nanobot Payload Delivery[/bold white] [bold cyan]==
             [bold green]Mission Briefing:[/bold green]
-            - Navigate widened corridors avoiding horizontal (═) and vertical (║) laser beams.
-            - Each beam hit increments ALERT; max allowed is 3.
+            - Deliver a payload of nanobots to the secure data archive avoiding security measure.
+            - Navigate corridors avoiding horizontal (═) and vertical (║) laser beams.
+            - Each beam hit increments ALERT; max allowed is 2.
             - Reach exit marker [bold green]X[/bold green] within 45 seconds.
             """
         ),
@@ -65,10 +66,6 @@ def show_intro() -> None:
         subtitle_align="center",
         border_style='bright_blue',
     )
-    console.clear()
-    console.print(panel)
-    # Wait for any key
-    term.inkey()
     console.clear()
     console.print(panel)
     # Wait for any key

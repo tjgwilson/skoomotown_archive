@@ -133,8 +133,8 @@ def data_stream_decrypt() -> bool:
             console.print(f"[bold cyan]>> Stage {stage} Protocol Initiated <<[/bold cyan]")
             console.print(
                 "[dim]Vault target: Skoomtown Archive core.\n"
-                "Wizard-grade encryptions guard the data.\n"
-                "Find the packet among decoys, then type it before being detected.[/dim]\n"
+                "Breach the Wizard-grade encryptions to start archive retrival.\n"
+                "Find the highlighted packets, avoid decoys, then type it before being detected.[/dim]\n"
             )
             console.print("Press [bold]Enter[/bold] to deploy hack sequence...")
             term.inkey()
