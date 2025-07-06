@@ -1,16 +1,3 @@
-"""
-Data Stream Decryption game module for Skoomtown Archive.
-
-A multi-stage, fast-paced CLI hacking mini-game:
-- Streams of random text scroll like a matrix cascade
-- Secret packets appear; you must memorise them
-- Under strict time pressure, type the packets to exfiltrate data
-- Errors raise intrusion alerts; too many and you're cut off
-- Track data fragments exfiltrated, throughput, and alert levels
-- Later stages include decoy packets in alternate colours
-- Embedded narrative and hacky prompts drive the fiction
-"""
-
 import random
 import time
 from typing import List, Tuple
@@ -20,6 +7,23 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
+# Constants for easy tuning
+MAX_STAGES = 5
+BASE_WIDTH = 40
+BASE_ROWS = 12
+BASE_DELAY = 0.25        # seconds between matrix frames
+BASE_TIME = 20.0         # initial time limit for input phase
+TIME_DECREMENT = 0.5     # seconds reduced per stage
+DELAY_DECREMENT = 0.02   # seconds reduced per stage for scroll speed
+MIN_DELAY = 0.1
+ALERT_THRESHOLD = 3
+DECOY_STYLE = "bold reverse yellow"
+INITIAL_BEEP_INTERVAL = 1.0  # seconds
+MIN_BEEP_INTERVAL = 0.2      # seconds
+GLITCH_FRAMES = 6
+GLITCH_DELAY = 0.05
+GLITCH_CHARS = '░▒▓█<>*'
+
 console = Console()
 term = Terminal()
 
@@ -27,12 +31,24 @@ term = Terminal()
 def generate_random_stream(length: int) -> str:
     """
     Generate a random uppercase alphanumeric string.
-
-    :param length: Desired length of the stream.
-    :return: Randomly-generated string.
     """
     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     return ''.join(random.choice(alphabet) for _ in range(length))
+
+
+def glitch_effect(frames: int = GLITCH_FRAMES, delay: float = GLITCH_DELAY) -> None:
+    """
+    Simulate a screen glitch effect upon intrusion detection.
+    """
+    width = term.width or BASE_WIDTH
+    height = (term.height or (BASE_ROWS * 2)) // 4
+    for _ in range(frames):
+        print(term.clear())
+        for _ in range(height):
+            line = ''.join(random.choice(GLITCH_CHARS) for _ in range(width))
+            console.print(Text(line, style="bold red"))
+        time.sleep(delay)
+    print(term.clear())
 
 
 def _draw_header(
@@ -40,24 +56,21 @@ def _draw_header(
     fragments: int,
     throughput: int,
     alert_level: int,
-    alert_threshold: int,
     time_left: float
 ) -> None:
     """
-    Render the top status panel with stage, data fragments, throughput,
-    alert bar, and countdown timer.
+    Render status panel with stage, fragments, throughput, alerts, and timer.
     """
-    alert_bar = '■' * alert_level + '·' * (alert_threshold - alert_level)
+    alert_bar = '■' * alert_level + '·' * (ALERT_THRESHOLD - alert_level)
     header = Panel(
         Text.assemble(
             (" STG ", "bold white on black"), (f"{stage}", "bold yellow"),
-            ("  FRAG ", "bold white on black"), (f"{fragments}KB ", "bold green"),
-            (" THP ", "bold white on black"), (f"×{throughput} ", "bold magenta"),
-            (" ALRT ", "bold white on black"), (alert_bar + " ", "bold red"),
+            (" FRAG ", "bold white on black"), (f"{fragments}KB", "bold green"),
+            (" THP ", "bold white on black"), (f"×{throughput}", "bold magenta"),
+            (" ALRT ", "bold white on black"), (alert_bar, "bold red"),
             (" TIME ", "bold white on black"), (f"{time_left:0.1f}s", "bold cyan"),
         ),
-        title=" Skoomtown Archive Intrusion ",
-        border_style="white"
+        title=" Skoomtown Archive Intrusion ", border_style="white"
     )
     console.print(header)
 
@@ -70,19 +83,12 @@ def _scroll_stream(
     delay: float
 ) -> None:
     """
-    Scroll a matrix of random text, injecting the secret packet and any decoys on random rows.
-
-    :param secret: The code fragment to hide in the stream.
-    :param decoys: List of (decoy_string, style) tuples.
-    :param rows: Number of lines to display.
-    :param width: Width of each line.
-    :param delay: Seconds between frames.
+    Scroll matrix of text injecting secret and decoys.
     """
-    # choose rows for secret and decoys
     secret_row = random.randrange(2, rows - 2)
-    decoy_rows = random.sample([r for r in range(2, rows-2) if r != secret_row],
-                              k=len(decoys))
-
+    decoy_rows = random.sample(
+        [r for r in range(2, rows - 2) if r != secret_row], k=len(decoys)
+    )
     for row in range(rows):
         buffer = list(generate_random_stream(width))
         if row == secret_row:
@@ -103,21 +109,9 @@ def _scroll_stream(
         time.sleep(delay)
 
 
-def data_stream_decrypt(
-    max_stages: int = 5,
-    base_width: int = 40,
-    base_rows: int = 12,
-    base_delay: float = 0.25,
-    base_time: float = 6.0,
-    alert_threshold: int = 3
-) -> bool:
+def data_stream_decrypt() -> bool:
     """
     Run the multi-stage Data Stream Decryption puzzle.
-
-    Levels 4 and 5 include decoy packets in a different colour.
-    Code length increases each stage, but time limits remain generous.
-
-    :return: True if all stages are cleared; False on detection.
     """
     fragments = 0
     throughput = 1
@@ -125,80 +119,94 @@ def data_stream_decrypt(
     console.print("\n[italic dim]Infiltrating Skoomtown Archive mainframe...[/italic dim]\n")
     time.sleep(1.0)
 
-    for stage in range(1, max_stages + 1):
-        width = base_width + (stage - 1) * 5
-        rows = base_rows + (stage - 1) * 3
-        delay = max(base_delay - (stage - 1) * 0.02, 0.1)
-        time_limit = base_time - (stage - 1) * 0.5
-        code_len = 4 + (stage - 1)
+    # Put terminal into cbreak for per-keystroke input and hide cursor
+    with term.cbreak(), term.hidden_cursor():
+        for stage in range(1, MAX_STAGES + 1):
+            width = BASE_WIDTH + (stage - 1) * 5
+            rows = BASE_ROWS + (stage - 1) * 3
+            delay = max(BASE_DELAY - (stage - 1) * DELAY_DECREMENT, MIN_DELAY)
+            time_limit = max(BASE_TIME - (stage - 1) * TIME_DECREMENT, BASE_TIME / 2)
+            code_len = 4 + (stage - 1)
 
-        # prepare decoys for later stages
-        decoys: List[Tuple[str, str]] = []
-        if stage >= 4:
-            # generate two decoys in yellow for stage 4, three for stage 5
-            count = 2 if stage == 4 else 3
-            decoys = [(generate_random_stream(code_len), "bold reverse yellow")
-                      for _ in range(count)]
+            # Stage intro
+            print(term.clear())
+            console.print(f"[bold cyan]>> Stage {stage} Protocol Initiated <<[/bold cyan]")
+            console.print(
+                "[dim]Vault target: Skoomtown Archive core.\n"
+                "Wizard-grade encryptions guard the data.\n"
+                "Find the packet among decoys, then type it before being detected.[/dim]\n"
+            )
+            console.print("Press [bold]Enter[/bold] to deploy hack sequence...")
+            term.inkey()
 
-        secret = generate_random_stream(code_len)
-        alert_level = 0
+            # Drain any leftover input before starting
+            while term.inkey(timeout=0.1):
+                pass
 
-        # Clear and announce stage
-        print(term.clear())
-        console.print(f"[bold cyan]>> Stage {stage} Engaged <<[/bold cyan]\n")
-        console.print(
-            f"[dim]Stage protocols: decrypt {code_len}-byte packet under fire."  
-            "Memorise amidst decoys." if decoys else "" + "\n"
-        )
+            # Prepare decoys and secret
+            decoys: List[Tuple[str, str]] = []
+            if stage >= 4:
+                count = 2 if stage == 4 else 3
+                decoys = [(generate_random_stream(code_len), DECOY_STYLE) for _ in range(count)]
+            secret = generate_random_stream(code_len)
+            alert_level = 0
 
-        # Display matrix with secret and decoys
-        _scroll_stream(secret, decoys, rows, width, delay)
+            # Scroll the matrix
+            _scroll_stream(secret, decoys, rows, width, delay)
 
-        # Input phase: blind typing
-        start_time = time.time()
-        last_beep = start_time
-        entered = ""
+            # Input loop: per-letter check
+            start = time.time()
+            last_beep = start
+            entered = ""
 
-        while (
-            len(entered) < len(secret)
-            and alert_level < alert_threshold
-            and (time.time() - start_time) < time_limit
-        ):
-            elapsed = time.time() - start_time
-            remaining = time_limit - elapsed
+            while (
+                len(entered) < len(secret)
+                and alert_level < ALERT_THRESHOLD
+                and (time.time() - start) < time_limit
+            ):
+                remaining = time_limit - (time.time() - start)
+                # beep timing
+                interval = MIN_BEEP_INTERVAL + (
+                    INITIAL_BEEP_INTERVAL - MIN_BEEP_INTERVAL
+                ) * (remaining / time_limit)
+                if time.time() - last_beep >= interval:
+                    console.bell()
+                    last_beep = time.time()
 
-            # adaptive beep
-            init_int, min_int = 1.0, 0.2
-            interval = min_int + (init_int - min_int) * (remaining / time_limit)
-            if time.time() - last_beep >= interval:
-                console.bell()
-                last_beep = time.time()
+                # refresh header
+                print(term.move_xy(0, 0) + term.clear_eol(), end="")
+                _draw_header(stage, fragments, throughput, alert_level, remaining)
 
-            # update header only
-            print(term.move_xy(0, 0) + term.clear_eol(), end="")
-            _draw_header(stage, fragments, throughput,
-                         alert_level, alert_threshold, remaining)
+                # capture and evaluate keystroke
+                key = term.inkey(timeout=0.1)
+                if not key or key.is_sequence:
+                    continue
+                char = key.upper()
+                if char == secret[len(entered)]:
+                    entered += char
+                else:
+                    alert_level += 1
+                    console.print(
+                        Text("UNUSUAL ACTIVITY DETECTED!", style="bold black on yellow")
+                    )
+                    time.sleep(0.2)
 
-            # capture keystroke silently
-            key = term.inkey(timeout=0.1)
-            if not key or key.is_sequence:
-                continue
-            char = key.upper()
-            if char == secret[len(entered)]:
-                entered += char
-            else:
-                alert_level += 1
+            success = (entered == secret) and (alert_level < ALERT_THRESHOLD)
+            if not success:
+                # glitch and failure messaging
+                glitch_effect()
                 console.print(
-                    Text("UNUSUAL ACTIVITY DETECTED!",
-                         style="bold black on yellow")
+                    "[bold red]== INTRUSION DETECTED: CONNECTION TERMINATED ==[/bold red]\n"
                 )
-                time.sleep(0.3)
+                console.print(f"[red]Expected packet: {secret}[/red]\n")
 
-        success = (entered == secret) and (alert_level < alert_threshold)
+                # drain leftover keys before exit
+                while term.inkey(timeout=0.1):
+                    pass
+                return False
 
-        # outcome
-        if success:
-            elapsed = time.time() - start_time
+            # success outcome
+            elapsed = time.time() - start
             base_pts = stage * 150
             speed_bonus = int((time_limit - elapsed) * 15) * throughput
             gained = base_pts * throughput + max(speed_bonus, 0)
@@ -210,12 +218,15 @@ def data_stream_decrypt(
                 f"[green]+{base_pts} base +{max(speed_bonus,0)} bonus -> {gained}KB[/green]\n"
             )
             time.sleep(1.2)
-        else:
-            console.print("\n[bold red]== INTRUSION DETECTED: CONNECTION TERMINATED ==[/bold red]\n")
-            console.print(f"[red]Packet {stage} was: {secret}[/red]\n")
-            return False
 
-    console.print("\n[bold magenta]== ARCHIVE BREACHED: ALL FRAGMENTS EXFILTRATED ==[/bold magenta]")
+            # drain before next stage
+            while term.inkey(timeout=0.1):
+                pass
+
+    # All stages complete
+    console.print(
+        "\n[bold magenta]== ARCHIVE BREACHED: ALL FRAGMENTS EXFILTRATED ==[/bold magenta]"
+    )
     console.print(f"[yellow]Total Data Exfiltrated: {fragments}KB[/yellow]\n")
     return True
 
