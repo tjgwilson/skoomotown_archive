@@ -1,14 +1,3 @@
-"""
-Main entry point for Skoomtown Archive hacking tool.
-
-Provides a themed database infiltration interface:
-- Menu to select among three hacking modules
-- Tracks which modules (games) are completed
-- Reveals firewall layers as each module is cracked
-- Unlocks a final data view once all modules are done
-- Returns to main menu on failure until exit
-"""
-
 import sys
 import time
 from typing import Set, Callable
@@ -24,6 +13,28 @@ from games.firewall_matrix_breach import firewall_breach
 
 console = Console()
 term = Terminal()
+
+# === Simplified SKOOMTOWN Banner & Flavor Text ===
+def show_banner() -> None:
+    console.clear()
+    console.print(
+        Panel(
+            Text("SKOOMTOWN ARCHIVE", style="bold magenta", justify="center"),
+            border_style="magenta",
+            padding=(1, 4),
+        )
+    )
+    console.print(
+        Panel(
+            Text(
+                "Welcome, Operative. You are accessing the Skoomtown Archive Breach Utility.\n"
+                "Select your protocol to initiate breach:\n",
+                style="italic cyan",
+                justify="center"
+            ),
+            border_style="dim white"
+        )
+    )
 
 # Firewall layers ASCII art
 FIREWALL_LAYERS = {
@@ -61,6 +72,22 @@ FIREWALL_LAYERS = {
             " │   ├──■──┤   │",
             " └───┴───┴───┘"
         ]
+    )
+}
+
+# Standardized module intros
+MODULE_INTROS = {
+    "data_stream": (
+        "Protocol Alpha: Data Stream Decrypt",
+        "Retrieve encrypted data packets from the Skoomtown Archive core by matching highlighted streams before detection."
+    ),
+    "deliver_payload": (
+        "Protocol Beta: Firewall Breach",
+        "Navigate laser grids in secure corridors to deliver a nanobot payload avoiding detection."
+    ),
+    "circuit_override": (
+        "Protocol Gamma: Circuit Override",
+        "Override the archive's circuit matrix by rotating tiles to bridge the air gap and enable remote access."
     )
 }
 
@@ -106,33 +133,26 @@ def read_data() -> None:
     sys.exit(0)
 
 
-def pass_game() -> bool:
-    """
-    Placeholder for modules not yet implemented.
-    Always returns False.
-    """
-    console.print("[yellow]Module not implemented yet.[/yellow]")
-    time.sleep(1)
-    return False
-
-
 def main() -> None:
     """
     Main loop presenting module selection menu and handling results.
     """
     completed: Set[str] = set()
+    show_banner()
+    time.sleep(4)
+
     games: list[tuple[str, str, Callable[[], bool], str]] = [
-        ("1", "Data Stream Decrypt", data_stream_decrypt, "data_stream"),
-        ("2", "Deliver Nanobot payload", firewall_breach, "deliver_payload"),
-        ("3", "Airgap Breach", circuit_override, "circuit_override"),
+        ("1", *MODULE_INTROS["data_stream"], data_stream_decrypt, "data_stream"),
+        ("2", *MODULE_INTROS["deliver_payload"], firewall_breach, "deliver_payload"),
+        ("3", *MODULE_INTROS["circuit_override"], circuit_override, "circuit_override"),
     ]
 
     while True:
         print_header(completed)
         console.print("[bold]Available Modules:[/bold]\n")
-        for key, name, _, segment in games:
+        for key, title, desc, func, segment in games:
             status = "[green]✓[/green]" if segment in completed else "[red]✗[/red]"
-            console.print(f" [bold]{key}[/bold]. {name} {status}")
+            console.print(f" [bold]{key}[/bold]. {title} {status}")
         if len(completed) == len(games):
             console.print(" [bold]4[/bold]. Read Secure Data [green]Unlocked[/green]")
         console.print(" [bold]q[/bold]. Quit\n")
@@ -143,23 +163,21 @@ def main() -> None:
             sys.exit(0)
 
         handled = False
-        for key, name, func, segment in games:
+        for key, title, desc, func, segment in games:
             if choice == key:
                 handled = True
-                console.print(Panel(f"Engaging module: [bold]{name}[/bold]", style="yellow"))
+                console.print(Panel(f"Engaging {title}", style="yellow"))
+                console.print(Panel(Text(desc, style="italic cyan"), border_style="cyan"))
+                time.sleep(4)
                 success = func()
                 if success and segment not in completed:
                     completed.add(segment)
-                    console.print(
-                        Panel(f"Node {name} compromised!", style="green")
-                    )
+                    console.print(Panel(f"{title} compromised!", style="green"))
                 elif not success:
-                    console.print(
-                        Panel(
-                            "Intrusion detected! Returning to main menu...",
-                            style="red"
-                        )
-                    )
+                    console.print(Panel(
+                        "Intrusion detected! Returning to main menu...",
+                        style="red"
+                    ))
                 time.sleep(2)
                 break
         if not handled:

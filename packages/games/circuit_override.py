@@ -8,6 +8,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from games.intro import show_module_intro
+
 console = Console()
 term = Terminal()
 
@@ -193,16 +195,12 @@ def circuit_override() -> bool:
                 grid[r_idx][c_idx] = ROTATION_MAP[grid[r_idx][c_idx]]
 
     # Intro sequence
-    print(term.clear())
-    console.print("[bold cyan]Circuit Override Protocol Ready[/bold cyan]")
-    console.print(
-        "[dim]Deploy nanobots to bridge the air gap into the Skoomtown Archive vault to allow remote access.\n"
-        "Rotate tiles to form a path from [green]E[/green] to [magenta]X[/magenta]. "
-        f"Avoid {TRAP_COUNT} traps hidden by wizard security professionals. "
-        "Traps will flash briefly at start—memorise their locations!\n"
-        f"Time limit: {TIME_LIMIT} seconds. Press Enter to begin.[/dim]"
+    show_module_intro(
+        "Protocol Gamma: Circuit Override",
+        "- Rotate tiles to form a path from [green]E[/green] to [magenta]X[/magenta].\n"
+        "- Avoid the wizard-hidden traps (they flash briefly at start).\n"
+        "- Complete within 120 seconds."
     )
-    term.inkey()
 
     # Reveal traps briefly
     print(term.clear())

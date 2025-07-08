@@ -7,6 +7,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
+from games.intro import show_module_intro
+
 # Constants for easy tuning
 MAX_STAGES = 5
 BASE_WIDTH = 40
@@ -129,15 +131,11 @@ def data_stream_decrypt() -> bool:
             code_len = 4 + (stage - 1)
 
             # Stage intro
-            print(term.clear())
-            console.print(f"[bold cyan]>> Stage {stage} Protocol Initiated <<[/bold cyan]")
-            console.print(
-                "[dim]Vault target: Skoomtown Archive core.\n"
-                "Breach the Wizard-grade encryptions to start archive retrival.\n"
-                "Find the highlighted packets, avoid decoys, then type it before being detected.[/dim]\n"
+            show_module_intro(
+                "Protocol Alpha: Data Stream Decrypt",
+                "- Retrieve encrypted data packets by matching highlighted streams before detection.\n"
+                "- Avoid decoys and type the code under time pressure."
             )
-            console.print("Press [bold]Enter[/bold] to deploy hack sequence...")
-            term.inkey()
 
             # Drain any leftover input before starting
             while term.inkey(timeout=0.1):

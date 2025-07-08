@@ -7,6 +7,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
+from games.intro import show_module_intro
+
 # --- Configuration Constants ---
 # Map legend:
 #  '#' = Wall
@@ -47,30 +49,6 @@ console = Console()
 term    = Terminal()
 
 
-def show_intro() -> None:
-    """
-    Display the mission briefing and pause for operator input.
-    """
-    panel = Panel(
-        Text.from_markup(
-            """
-            [bold cyan]== [bold white]Nanobot Payload Delivery[/bold white] [bold cyan]==
-            [bold green]Mission Briefing:[/bold green]
-            - Deliver a payload of nanobots to the secure data archive avoiding security measure.
-            - Navigate corridors avoiding horizontal (═) and vertical (║) laser beams.
-            - Each beam hit increments ALERT; max allowed is 2.
-            - Reach exit marker [bold green]X[/bold green] within 45 seconds.
-            """
-        ),
-        subtitle="Press any key to continue...",
-        subtitle_align="center",
-        border_style='bright_blue',
-    )
-    console.clear()
-    console.print(panel)
-    # Wait for any key
-    term.inkey()
-    console.clear()
 def find_route() -> Optional[List[Tuple[int, int]]]:
     """
     Find a path from start (1,1) to exit 'X' using BFS.
@@ -199,7 +177,12 @@ def firewall_breach() -> bool:
     :return: True on successful breach, False on failure.
     """
     # Show briefing and optimal path
-    show_intro()
+    show_module_intro(
+        "Protocol Beta: Firewall Breach",
+        "- Deliver a nanobot payload through security corridors.\n"
+        "- Navigate horizontal (═) and vertical (║) laser grids; each hit increments ALERT.\n"
+        "- Reach exit [bold green]X[/bold green] within 45 seconds."
+    )
     path = find_route()
     if path:
         flash_route(path)
@@ -254,23 +237,3 @@ def firewall_breach() -> bool:
                 return True
 
             update_beams(beams)
-
-    # unreachable
-
-def main() -> None:
-    """
-    Run intro, flash optimal route, then execute breach.
-    """
-    show_intro()
-    path = find_route()
-    if path:
-        flash_route(path)
-    result = firewall_breach()
-    console.clear()
-    if result:
-        console.print('[bold green]>> PAYLOAD DELIVERED: CORE COMPROMISED <<[/bold green]')
-    else:
-        console.print('[bold red]>> IDS OVERRIDE: ACCESS DENIED <<[/bold red]')
-
-if __name__ == '__main__':
-    main()
