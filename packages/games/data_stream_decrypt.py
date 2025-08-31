@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from games.intro import show_module_intro
+from utility.intro import show_module_intro
 
 # Constants for easy tuning
 MAX_STAGES = 5
@@ -118,8 +118,11 @@ def data_stream_decrypt() -> bool:
     fragments = 0
     throughput = 1
 
-    console.print("\n[italic dim]Infiltrating Skoomtown Archive mainframe...[/italic dim]\n")
-    time.sleep(1.0)
+    show_module_intro(
+        "Protocol Alpha: Infiltrating Skoomtown Archive mainframe...",
+        "- Retrieve encrypted data packets by matching highlighted streams before detection.\n"
+        "- Avoid decoys and type the code under time pressure."
+    )
 
     # Put terminal into cbreak for per-keystroke input and hide cursor
     with term.cbreak(), term.hidden_cursor():
@@ -131,11 +134,7 @@ def data_stream_decrypt() -> bool:
             code_len = 4 + (stage - 1)
 
             # Stage intro
-            show_module_intro(
-                "Protocol Alpha: Data Stream Decrypt",
-                "- Retrieve encrypted data packets by matching highlighted streams before detection.\n"
-                "- Avoid decoys and type the code under time pressure."
-            )
+            console.clear()
 
             # Drain any leftover input before starting
             while term.inkey(timeout=0.1):
@@ -223,7 +222,7 @@ def data_stream_decrypt() -> bool:
 
     # All stages complete
     console.print(
-        "\n[bold magenta]== ARCHIVE BREACHED: ALL FRAGMENTS EXFILTRATED ==[/bold magenta]"
+        "\n[bold magenta]== ARCHIVE FIRREWBREACHED: ALL FRAGMENTS EXFILTRATED ==[/bold magenta]"
     )
     console.print(f"[yellow]Total Data Exfiltrated: {fragments}KB[/yellow]\n")
     return True

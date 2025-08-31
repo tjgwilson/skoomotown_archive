@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from games.intro import show_module_intro
+from utility.intro import show_module_intro
 
 # --- Configuration Constants ---
 # Map legend:
@@ -178,7 +178,7 @@ def firewall_breach() -> bool:
     """
     # Show briefing and optimal path
     show_module_intro(
-        "Protocol Beta: Firewall Breach",
+        "Protocol Beta: Airgap Breach",
         "- Deliver a nanobot payload through security corridors.\n"
         "- Navigate horizontal (═) and vertical (║) laser grids; each hit increments ALERT.\n"
         "- Reach exit [bold green]X[/bold green] within 45 seconds."

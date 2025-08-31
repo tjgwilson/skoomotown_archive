@@ -18,7 +18,7 @@ def show_module_intro(title: str, description: str) -> None:
             f"{description}"
         ),
         border_style="bright_blue",
-        subtitle="Press any key to continue...",
+        subtitle="Press enter to continue...",
         subtitle_align="center",
         padding=(1, 2),
     )
