@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import time
 from typing import Callable, Set, Tuple, List
@@ -146,8 +148,11 @@ def main() -> None:
             status = '[green]✓[/green]' if segment in completed else '[red]✗[/red]'
             console.print(f' [bold]{key}[/bold]. {title} {status}')
 
-        # For testing you're forcing it visible; that's fine:
-        console.print(' [bold]4[/bold]. Read Secure Data [green]Unlocked[/green]')
+        # Reveal option 4 only when all sub-games are complete
+        secret_unlocked = (len(completed) == len(games))
+        if secret_unlocked:
+            console.print(' [bold]4[/bold]. Read Secure Data [green]Unlocked[/green]')
+
         console.print(' [bold]q[/bold]. Quit\n')
 
         choice = console.input('>> ').strip().lower()
@@ -155,39 +160,33 @@ def main() -> None:
             console.print('Exiting infiltration tool.')
             sys.exit(0)
 
-        handled = False  # <-- start False
+        handled = False
 
         for key, title, func, segment in games:
             if choice == key:
-                handled = True  # <-- set True only when we handle a game
+                handled = True
                 console.print(Panel(f'Engaging {title}', style='yellow'))
                 time.sleep(0.8)
-
-                console.clear()  # Clear before launching a sub-game
-
+                console.clear()
                 success = func()
                 if success and segment not in completed:
                     completed.add(segment)
                     console.print(Panel(f'{title} compromised!', style='green'))
                 elif not success:
                     console.print(
-                        Panel(
-                            'Intrusion detected! Returning to main menu...',
-                            style='red',
-                        )
+                        Panel('Intrusion detected! Returning to main menu...',
+                              style='red')
                     )
                     time.sleep(1.2)
                 time.sleep(0.6)
                 break
 
         if not handled:
-            # While testing, allow 4 unconditionally. Later, re-enable the completion check.
-            if choice == '4':  # and len(completed) == len(games):
-                show_unlocked_text()  # loads vault.txt by default
-                # After returning, loop will redraw the menu
-            else:
-                console.print('[red]Invalid choice. Use 1,2,3,4 or q.[/red]')
-                time.sleep(0.6)
+            if choice == '4' and secret_unlocked:
+                show_unlocked_text()  # loads your vault file; returns to menu
+                continue
+            console.print('[red]Invalid choice. Use 1,2,3 or q.[/red]')
+            time.sleep(0.6)
 
 
 if __name__ == '__main__':
