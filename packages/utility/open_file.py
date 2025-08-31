@@ -21,18 +21,53 @@ term = Terminal()
 console = Console()
 
 
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+
 def _default_secret_file() -> Path:
     """
     Resolve the default unlocked-text file path.
 
-    Prefers ``vault.txt`` alongside a frozen executable (PyInstaller).
-    Otherwise uses the directory of the running script.
+    Dev (non-frozen):
+        utility/open_file.py  -> repo root at parent of this file's parent
+        Looks for: <repo_root>/data/vault.txt
 
-    :return: Path to the default secret file.
+    Frozen (PyInstaller):
+        EXE in: <dist>/skoomtown.exe  (onefile)
+                or <dist>/skoomtown/skoomtown.exe (onedir)
+        Looks for (in order):
+            1) <exe_dir>/data/vault.txt
+            2) <exe_dir>/../data/vault.txt
+
+    :return: Path to the resolved vault file (first match), or the preferred
+             path (<exe_dir>/data/vault.txt or <repo_root>/data/vault.txt)
+             if none exist (so callers can show a helpful error).
     """
+    candidates: list[Path] = []
+
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).parent.parent / 'data' / "vault.txt"
-    return Path(sys.argv[0]).resolve().parent.parent / 'data' / "vault.txt"
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates.append(exe_dir / "data" / "vault.txt")
+        candidates.append(exe_dir.parent / "data" / "vault.txt")
+    else:
+        # This module likely lives in utility/open_file.py
+        mod_dir = Path(__file__).resolve().parent
+        repo_root = mod_dir.parent  # one up from 'utility' -> repo root
+        # Also try based on the running script path, in case layout differs
+        script_root = Path(sys.argv[0]).resolve().parent
+        candidates.append(repo_root / "data" / "vault.txt")
+        candidates.append(script_root / "data" / "vault.txt")
+
+    for p in candidates:
+        if p.exists():
+            return p
+
+    # Fall back to the first preferred path (so you can report a clear error)
+    return candidates[0]
+
 
 
 def load_unlocked_text(path: Optional[str | Path] = None) -> str:

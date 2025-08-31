@@ -42,15 +42,42 @@ def _default_password_file() -> Path:
     """
     Resolve the default password file location.
 
-    Prefers a ``password.txt`` placed alongside the frozen executable
-    (e.g., PyInstaller). When running from source, uses the directory of
-    the invoking script (``sys.argv[0]``).
+    Dev (non-frozen):
+        This module is typically in ``utility/access.py``.
+        We treat the repository root as the parent of this file's directory
+        (i.e. ``<repo_root> = Path(__file__).parent.parent``).
+        Looks for: ``<repo_root>/data/password.txt``.
+        Also tries: ``<script_dir>/data/password.txt`` to be tolerant of layout.
 
-    :return: Path to ``password.txt`` near the app entry point.
+    Frozen (PyInstaller):
+        EXE usually lives in:
+            - onefile: ``<dist>/skoomtown.exe``
+            - onedir : ``<dist>/skoomtown/skoomtown.exe``
+        Looks for (in order):
+            1) ``<exe_dir>/data/password.txt``
+            2) ``<exe_dir>/../data/password.txt``
+
+    :return: The first existing candidate path. If none exist, returns the
+             primary preferred path so callers can raise a clear error.
     """
-    if getattr(sys, 'frozen', False):  # PyInstaller / frozen app
-        return Path(sys.executable).parent.parent / 'data' / 'password.txt'
-    return Path(sys.argv[0]).resolve().parent.parent / 'data' / 'password.txt'
+    candidates: list[Path] = []
+
+    if getattr(sys, "frozen", False):
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates.append(exe_dir / "data" / "password.txt")
+        candidates.append(exe_dir.parent / "data" / "password.txt")
+    else:
+        mod_dir = Path(__file__).resolve().parent
+        repo_root = mod_dir.parent  # parent of 'utility' -> repo root
+        script_dir = Path(sys.argv[0]).resolve().parent
+        candidates.append(repo_root / "data" / "password.txt")
+        candidates.append(script_dir / "data" / "password.txt")
+
+    for path in candidates:
+        if path.exists():
+            return path
+
+    return candidates[0]
 
 
 def load_password_from_file(path: Optional[str | Path] = None) -> str:
