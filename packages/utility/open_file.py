@@ -21,12 +21,6 @@ term = Terminal()
 console = Console()
 
 
-from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-
 def _default_secret_file() -> Path:
     """
     Resolve the default unlocked-text file path.

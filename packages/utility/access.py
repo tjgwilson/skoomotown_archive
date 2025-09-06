@@ -63,11 +63,11 @@ def _default_password_file() -> Path:
     candidates: list[Path] = []
 
     if getattr(sys, "frozen", False):
-        exe_dir = Path(sys.executable).resolve().parent
+        exe_dir = Path(sys.executable).resolve().parent.parent
         candidates.append(exe_dir / "data" / "password.txt")
         candidates.append(exe_dir.parent / "data" / "password.txt")
     else:
-        mod_dir = Path(__file__).resolve().parent
+        mod_dir = Path(__file__).resolve().parent.parent
         repo_root = mod_dir.parent  # parent of 'utility' -> repo root
         script_dir = Path(sys.argv[0]).resolve().parent
         candidates.append(repo_root / "data" / "password.txt")
