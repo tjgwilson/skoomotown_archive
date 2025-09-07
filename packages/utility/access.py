@@ -69,7 +69,7 @@ def _default_password_file() -> Path:
     else:
         mod_dir = Path(__file__).resolve().parent.parent
         repo_root = mod_dir.parent  # parent of 'utility' -> repo root
-        script_dir = Path(sys.argv[0]).resolve().parent
+        script_dir = Path(sys.argv[0]).resolve().parent.parent
         candidates.append(repo_root / "data" / "password.txt")
         candidates.append(script_dir / "data" / "password.txt")
 

@@ -43,15 +43,15 @@ def _default_secret_file() -> Path:
     candidates: list[Path] = []
 
     if getattr(sys, "frozen", False):
-        exe_dir = Path(sys.executable).resolve().parent
+        exe_dir = Path(sys.executable).resolve().parent.parent
         candidates.append(exe_dir / "data" / "vault.txt")
         candidates.append(exe_dir.parent / "data" / "vault.txt")
     else:
         # This module likely lives in utility/open_file.py
-        mod_dir = Path(__file__).resolve().parent
+        mod_dir = Path(__file__).resolve().parent.parent
         repo_root = mod_dir.parent  # one up from 'utility' -> repo root
         # Also try based on the running script path, in case layout differs
-        script_root = Path(sys.argv[0]).resolve().parent
+        script_root = Path(sys.argv[0]).resolve().parent.parent
         candidates.append(repo_root / "data" / "vault.txt")
         candidates.append(script_root / "data" / "vault.txt")
 
